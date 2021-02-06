@@ -136,9 +136,35 @@ class ParticleFilter:
     
 
     def initialize_particle_cloud(self):
-        
+                
         # TODO
+        self.particle_cloud = []
+        xrange = (self.map.info.width / 2)
+        yrange = (self.map.info.height / 2)
+        random.seed()
+        for i in range(self.num_particles):
+            p = Pose()
+            # Position
+            p.position = Point()
+            p.position.x = random.randint(-xrange, xrange)
+            p.position.y = random.randint(-yrange, yrange)
+            p.position.z = 0
+            # Orientation / Angle
+            p.orientation = Quaternion()
+            q = quaternion_from_euler(0.0, 0.0, random.randint(0, np.pi))
+            p.orientation.x = q[0]
+            p.orientation.y = q[1]
+            p.orientation.z = q[2]
+            p.orientation.w = q[3]*
 
+            # TODO: Do i check to see if this p already exists?
+            # If it does do i do it again or do I increase the weight
+
+            # initialize the new particle, where all will have the same weight (1.0)
+            new_particle = Particle(p, 1.0)
+
+            # append the particle to the particle cloud
+            self.particle_cloud.append(new_particle)
 
         self.normalize_particles()
 
@@ -149,6 +175,11 @@ class ParticleFilter:
         # make all the particle weights sum to 1.0
         
         # TODO
+        total  = len(self.particle_cloud)
+
+        for p in self.particle_cloud:
+            p.w = p.w / total
+
 
 
 
