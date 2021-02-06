@@ -1,3 +1,8 @@
+# Feedback
+Feel free to use the helper function draw_random_sample() to help with the resampling step. The estimated robot pose should be computed not using the weights of the particles but simply the positions and orientations of the particles themselves. You might want to think about ways to ADD noise to thesystem.
+
+
+
 # particle_filter_project
 Kailin Wu & Hakim Lahlou
 ### Initializing Particle Cloud
