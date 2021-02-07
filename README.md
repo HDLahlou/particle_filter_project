@@ -5,6 +5,7 @@ Feel free to use the helper function draw_random_sample() to help with the resam
 
 # particle_filter_project
 Kailin Wu & Hakim Lahlou
+
 ### Initializing Particle Cloud
 *  We will randomly distribute the particles throughout the space, having a discrete set that is less than the total size of the area. We will implement this by using a random number generator to designate where the particles will go, and will avoid distributing particles to spaces that already have a particle. 
 * We will test this by running this algorithm N times, where N is the number of possible spaces, to see if there are any biases or trends in the distribution, ensuring that it is truly random. This can also be tested visually; by looking at the distribution of particles we can see if there is an area clearly not covered by enough particles compared to others.
