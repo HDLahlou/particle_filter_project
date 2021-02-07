@@ -6,6 +6,7 @@ from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import Quaternion, Point, Pose, PoseArray, PoseStamped
 from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Header, String
+from likelihood_field import LikelihoodField
 
 import tf
 from tf import TransformListener
@@ -19,6 +20,13 @@ from copy import deepcopy
 
 from random import randint, random
 
+
+def compute_prob_zero_centered_gaussian(dist, sd):
+    """ Takes in distance from zero (dist) and standard deviation (sd) for gaussian
+        and returns probability (likelihood) of observation """
+    c = 1.0 / (sd * math.sqrt(2 * math.pi))
+    prob = c * math.exp((-math.pow(dist,2))/(2 * math.pow(sd, 2)))
+    return prob
 
 
 def get_yaw_from_pose(p):
@@ -118,6 +126,7 @@ class ParticleFilter:
         # enable listening for and broadcasting corodinate transforms
         self.tf_listener = TransformListener()
         self.tf_broadcaster = TransformBroadcaster()
+        self.likelihood_field = LikelihoodField()
 
 
         # intialize the particle cloud
@@ -155,7 +164,7 @@ class ParticleFilter:
             p.orientation.x = q[0]
             p.orientation.y = q[1]
             p.orientation.z = q[2]
-            p.orientation.w = q[3]*
+            p.orientation.w = q[3]
 
             # TODO: Do i check to see if this p already exists?
             # If it does do i do it again or do I increase the weight
@@ -294,6 +303,51 @@ class ParticleFilter:
     def update_particle_weights_with_measurement_model(self, data):
 
         # TODO
+        # wait until initialization is complete
+        if not(self.initialized):
+            return
+
+        cardinal_directions_idxs = [0, 90, 180, 270]
+
+        for p in self.particle_cloud:
+            q = 1
+            for cd in cardinal_directions_idxs:
+
+                # grab the observation at time t and laser range finder index k
+                z_t_k = data.ranges[cd]
+
+                # set the distance to the max (3.5m) if the value is greater than the max value
+                # it would also be fine to skip this sensor measurement according to the 
+                # likelihood field algorithm formulation
+                if (z_t_k > 3.5):
+                    z_t_k = 3.5
+
+                # get the orientation of the robot from the quaternion (index 2 of the Euler angle)
+                theta = get_yaw_from_pose(p)
+
+                # TODO: In case the sensor is not at 0,0 
+                # sin_theta = math.sin(theta)
+                # cos_theta = math.cos(theta)
+                # translate and rotate the laser scan reading from the robot to the particle's 
+                # location and orientation
+                x_z_t_k = p.pose.position.x + z_t_k * math.cos(theta + (cd * math.pi / 180.0))
+                y_z_t_k = p.pose.position.y + z_t_k * math.sin(theta + (cd * math.pi / 180.0))
+
+                # find the distance to the closest obstacle
+                closest_obstacle_dist = self.likelihood_field.get_closest_obstacle_distance(x_z_t_k, y_z_t_k)
+
+                # compute the probability based on a zero-centered gaussian with sd = 0.1
+                prob = compute_prob_zero_centered_gaussian(closest_obstacle_dist, 0.1)
+
+                # multiply all sensor readings together
+                q = q * prob
+
+                # print everything out so we can see what we get and debug
+                print(p)
+                print("Scan[", cd, "]: ", z_t_k)
+                print("\t", cd, ": [", x_z_t_k, ", ", y_z_t_k, "]")
+                print("\tobs dist: ", closest_obstacle_dist)
+                print("\tprob: ", prob, "\n")
 
 
         
@@ -304,6 +358,28 @@ class ParticleFilter:
         # all of the particles correspondingly
 
         # TODO
+        curr_x = self.odom_pose.pose.position.x
+        old_x = self.odom_pose_last_motion_update.pose.position.x
+        delta_x = curr_x - old_x
+
+        curr_y = self.odom_pose.pose.position.y
+        old_y = self.odom_pose_last_motion_update.pose.position.y
+        delta_y = curr_y - old_y
+
+        # TODO is this how we handle angles?
+        # curr_yaw = get_yaw_from_pose(self.odom_pose.pose)
+        # old_yaw = get_yaw_from_pose(self.odom_pose_last_motion_update.pose)
+        # delta_yaw = curr_yaw - old_yaw
+
+        for p in self.particle_cloud:
+            p.position.x += delta_x
+            p.position.y += delta_y
+
+            # p.orientation.x = q[0]
+            # p.orientation.y = q[1]
+            # p.orientation.z = q[2]
+            # p.orientation.w = q[3]
+
 
 
 
