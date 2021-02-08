@@ -76,7 +76,7 @@ class ParticleFilter:
     def __init__(self):
 
         # once everything is setup initialized will be set to true
-        self.initialized = False        
+        self.initialized = False
 
 
         # initialize this particle filter node
@@ -103,7 +103,7 @@ class ParticleFilter:
         self.robot_estimate = Pose()
 
         # set threshold values for linear and angular movement before we preform an update
-        self.lin_mvmt_threshold = 0.2        
+        self.lin_mvmt_threshold = 0.2
         self.ang_mvmt_threshold = (np.pi / 6)
 
         self.odom_pose_last_motion_update = None
@@ -142,10 +142,10 @@ class ParticleFilter:
 
         self.occupancy_field = OccupancyField(data)
 
-    
+
 
     def initialize_particle_cloud(self):
-                
+
         # TODO
         self.particle_cloud = []
         xrange = (self.map.info.width / 2)
@@ -182,15 +182,14 @@ class ParticleFilter:
 
     def normalize_particles(self):
         # make all the particle weights sum to 1.0
-        
+
         # TODO
-        total  = len(self.particle_cloud)
+        total  = 0
+        for p in self.particle_cloud: # add up all weights
+            total += p.w
 
-        for p in self.particle_cloud:
+        for p in self.particle_cloud: # divide each weight by the total
             p.w = p.w / total
-
-
-
 
     def publish_particle_cloud(self):
 
@@ -217,7 +216,11 @@ class ParticleFilter:
 
     def resample_particles(self):
 
-        # TODO
+        # TODO kailin
+        num_particles
+        draw_random_sample( )
+        for p in self.particle_cloud:
+            if p.w
 
 
 
@@ -232,12 +235,12 @@ class ParticleFilter:
             return
 
         # wait for a little bit for the transform to become avaliable (in case the scan arrives
-        # a little bit before the odom to base_footprint transform was updated) 
+        # a little bit before the odom to base_footprint transform was updated)
         self.tf_listener.waitForTransform(self.base_frame, self.odom_frame, data.header.stamp, rospy.Duration(0.5))
         if not(self.tf_listener.canTransform(self.base_frame, data.header.frame_id, data.header.stamp)):
             return
 
-        # calculate the pose of the laser distance sensor 
+        # calculate the pose of the laser distance sensor
         p = PoseStamped(
             header=Header(stamp=rospy.Time(0),
                           frame_id=data.header.frame_id))
@@ -270,7 +273,7 @@ class ParticleFilter:
             curr_yaw = get_yaw_from_pose(self.odom_pose.pose)
             old_yaw = get_yaw_from_pose(self.odom_pose_last_motion_update.pose)
 
-            if (np.abs(curr_x - old_x) > self.lin_mvmt_threshold or 
+            if (np.abs(curr_x - old_x) > self.lin_mvmt_threshold or
                 np.abs(curr_y - old_y) > self.lin_mvmt_threshold or
                 np.abs(curr_yaw - old_yaw) > self.ang_mvmt_threshold):
 
@@ -295,11 +298,21 @@ class ParticleFilter:
 
     def update_estimated_robot_pose(self):
         # based on the particles within the particle cloud, update the robot pose estimate
-        
-        # TODO
+        # use pose estimate of the most highly weighted particle
+        # if multiple share the same highest weight, use the first one
+
+        max_weight = 0
+
+        for p in self.particle_cloud:
+            if (p.w > max_weight):
+                max_weight = p.w
+                self.robot_estimate = p
 
 
-    
+        # TODO kailin
+
+
+
     def update_particle_weights_with_measurement_model(self, data):
 
         # TODO
@@ -317,7 +330,7 @@ class ParticleFilter:
                 z_t_k = data.ranges[cd]
 
                 # set the distance to the max (3.5m) if the value is greater than the max value
-                # it would also be fine to skip this sensor measurement according to the 
+                # it would also be fine to skip this sensor measurement according to the
                 # likelihood field algorithm formulation
                 if (z_t_k > 3.5):
                     z_t_k = 3.5
@@ -325,10 +338,10 @@ class ParticleFilter:
                 # get the orientation of the robot from the quaternion (index 2 of the Euler angle)
                 theta = get_yaw_from_pose(p)
 
-                # TODO: In case the sensor is not at 0,0 
+                # TODO: In case the sensor is not at 0,0
                 # sin_theta = math.sin(theta)
                 # cos_theta = math.cos(theta)
-                # translate and rotate the laser scan reading from the robot to the particle's 
+                # translate and rotate the laser scan reading from the robot to the particle's
                 # location and orientation
                 x_z_t_k = p.pose.position.x + z_t_k * math.cos(theta + (cd * math.pi / 180.0))
                 y_z_t_k = p.pose.position.y + z_t_k * math.sin(theta + (cd * math.pi / 180.0))
@@ -350,7 +363,7 @@ class ParticleFilter:
                 print("\tprob: ", prob, "\n")
 
 
-        
+
 
     def update_particles_with_motion_model(self):
 
@@ -384,17 +397,8 @@ class ParticleFilter:
 
 
 if __name__=="__main__":
-    
+
 
     pf = ParticleFilter()
 
     rospy.spin()
-
-
-
-
-
-
-
-
-
