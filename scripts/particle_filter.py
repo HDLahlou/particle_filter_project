@@ -41,7 +41,7 @@ def get_yaw_from_pose(p):
 
     return yaw
 
-
+#testing 
 def draw_random_sample(choices, probabilities, n):
     """ Return a random sample of n elements from the set choices with the specified probabilities
         choices: the values to sample from represented as a list
