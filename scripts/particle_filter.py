@@ -41,7 +41,7 @@ def get_yaw_from_pose(p):
 
     return yaw
 
-#testing 
+#testing
 def draw_random_sample(choices, probabilities, n):
     """ Return a random sample of n elements from the set choices with the specified probabilities
         choices: the values to sample from represented as a list
@@ -216,13 +216,17 @@ class ParticleFilter:
 
     def resample_particles(self):
 
-        # TODO kailin
-        num_particles
-        draw_random_sample( )
+        # TODO
+        """
+        resample the particles - the probability of selecting a given particle
+        for the new sample is equal to the weight of the particle
+        """
+
+        weightlist = []
         for p in self.particle_cloud:
-            if p.w
+            weightlist.append(p.w)
 
-
+        self.particle_cloud = draw_random_sample(self.particle_cloud, weightlist, self.num_particles)
 
     def robot_scan_received(self, data):
 
@@ -298,18 +302,38 @@ class ParticleFilter:
 
     def update_estimated_robot_pose(self):
         # based on the particles within the particle cloud, update the robot pose estimate
-        # use pose estimate of the most highly weighted particle
-        # if multiple share the same highest weight, use the first one
+        # set to average particle
+        # t stands for total, p stands for point, q for quaternion
+
 
         max_weight = 0
 
+        tp_x = 0
+        tp_y = 0
+        tp_z = 0
+
+        tq_x = 0
+        tq_y = 0
+        tq_z = 0
+        tq_w = 0
+
         for p in self.particle_cloud:
-            if (p.w > max_weight):
-                max_weight = p.w
-                self.robot_estimate = p
+            tp_x += p.position.x
+            tp_y += p.position.y
+            tp_z += p.position.z
+            tq_x += p.orientation.x
+            tq_y += p.orientation.y
+            tq_z += p.orientation.z
+            tq_w += p.orientation.w
 
-
-        # TODO kailin
+        self.robot_estimate.position.x = tp_x/self.num_particles
+        self.robot_estimate.position.y = tp_y/self.num_particles
+        self.robot_estimate.position.z = tp_z/self.num_particles
+        self.robot_estimate.orientation.x = tq_x/self.num_particles
+        self.robot_estimate.orientation.y = tq_y/self.num_particles
+        self.robot_estimate.orientation.z = tq_z/self.num_particles
+        self.robot_estimate.orientation.x = tq_w/self.num_particles
+        # TODO
 
 
 
