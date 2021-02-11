@@ -20,6 +20,8 @@ from copy import deepcopy
 
 from random import randint, random
 
+import random
+
 
 def compute_prob_zero_centered_gaussian(dist, sd):
     """ Takes in distance from zero (dist) and standard deviation (sd) for gaussian
@@ -74,6 +76,7 @@ class ParticleFilter:
 
 
     def __init__(self):
+        print("self init\n")
 
         # once everything is setup initialized will be set to true
         self.initialized = False
@@ -90,7 +93,7 @@ class ParticleFilter:
 
         # inialize our map and occupancy field
         self.map = OccupancyGrid()
-        self.occupancy_field = None
+        #self.occupancy_field = None
 
 
         # the number of particles used in the particle filter
@@ -140,13 +143,14 @@ class ParticleFilter:
 
         self.map = data
 
-        self.occupancy_field = OccupancyField(data)
+        #self.occupancy_field = OccupancyField(data) this is causing an error?
 
 
 
     def initialize_particle_cloud(self):
 
         # TODO
+        print("initialize cloud\n")
         self.particle_cloud = []
         xrange = (self.map.info.width / 2)
         yrange = (self.map.info.height / 2)
@@ -160,7 +164,7 @@ class ParticleFilter:
             p.position.z = 0
             # Orientation / Angle
             p.orientation = Quaternion()
-            q = quaternion_from_euler(0.0, 0.0, random.randint(0, np.pi))
+            q = quaternion_from_euler(0.0, 0.0, random.uniform(0, np.pi)) # ask
             p.orientation.x = q[0]
             p.orientation.y = q[1]
             p.orientation.z = q[2]
@@ -175,9 +179,13 @@ class ParticleFilter:
             # append the particle to the particle cloud
             self.particle_cloud.append(new_particle)
 
+
+
         self.normalize_particles()
 
         self.publish_particle_cloud()
+
+        print(self.num_particles)
 
 
     def normalize_particles(self):
@@ -425,4 +433,5 @@ if __name__=="__main__":
 
     pf = ParticleFilter()
 
+    print("spin\n")
     rospy.spin()
