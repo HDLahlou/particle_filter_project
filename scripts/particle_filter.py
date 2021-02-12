@@ -155,6 +155,7 @@ class ParticleFilter:
         xrange = (self.map.info.width / 2)
         yrange = (self.map.info.height / 2)
         random.seed()
+        self.map.info.origin.position.x
         for i in range(self.num_particles):
             p = Pose()
             # Position
@@ -412,18 +413,19 @@ class ParticleFilter:
         delta_y = curr_y - old_y
 
         # TODO is this how we handle angles?
-        # curr_yaw = get_yaw_from_pose(self.odom_pose.pose)
-        # old_yaw = get_yaw_from_pose(self.odom_pose_last_motion_update.pose)
-        # delta_yaw = curr_yaw - old_yaw
+        curr_yaw = get_yaw_from_pose(self.odom_pose.pose)
+        old_yaw = get_yaw_from_pose(self.odom_pose_last_motion_update.pose)
+        delta_yaw = curr_yaw - old_yaw
 
         for p in self.particle_cloud:
             p.position.x += delta_x
             p.position.y += delta_y
 
-            # p.orientation.x = q[0]
-            # p.orientation.y = q[1]
-            # p.orientation.z = q[2]
-            # p.orientation.w = q[3]
+            q = quaternion_from_euler(0.0, 0.0, delta_yaw) # ask
+            p.orientation.x += q[0]
+            p.orientation.y += q[1]
+            p.orientation.z += q[2]
+            p.orientation.w += q[3]
 
 
 
