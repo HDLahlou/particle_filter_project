@@ -252,7 +252,7 @@ class ParticleFilter:
         weightlist = []
         for p in self.particle_cloud:
             weightlist.append(p.w)
-
+        print(self.num_particles)
         self.particle_cloud = draw_random_sample(self.particle_cloud, weightlist, self.num_particles)
 
     def robot_scan_received(self, data):
@@ -345,13 +345,13 @@ class ParticleFilter:
         tq_w = 0
 
         for p in self.particle_cloud:
-            tp_x += p.position.x
-            tp_y += p.position.y
-            tp_z += p.position.z
-            tq_x += p.orientation.x
-            tq_y += p.orientation.y
-            tq_z += p.orientation.z
-            tq_w += p.orientation.w
+            tp_x += p.pose.position.x
+            tp_y += p.pose.position.y
+            tp_z += p.pose.position.z
+            tq_x += p.pose.orientation.x
+            tq_y += p.pose.orientation.y
+            tq_z += p.pose.orientation.z
+            tq_w += p.pose.orientation.w
 
         self.robot_estimate.position.x = tp_x/self.num_particles
         self.robot_estimate.position.y = tp_y/self.num_particles
@@ -387,7 +387,7 @@ class ParticleFilter:
                     z_t_k = 3.5
 
                 # get the orientation of the robot from the quaternion (index 2 of the Euler angle)
-                theta = get_yaw_from_pose(p)
+                theta = get_yaw_from_pose(p.pose)
 
                 # TODO: In case the sensor is not at 0,0
                 # sin_theta = math.sin(theta)
@@ -407,11 +407,12 @@ class ParticleFilter:
                 q = q * prob
 
                 # print everything out so we can see what we get and debug
-                print(p)
-                print("Scan[", cd, "]: ", z_t_k)
-                print("\t", cd, ": [", x_z_t_k, ", ", y_z_t_k, "]")
-                print("\tobs dist: ", closest_obstacle_dist)
-                print("\tprob: ", prob, "\n")
+                # print(p)
+                # print("Scan[", cd, "]: ", z_t_k)
+                # print("\t", cd, ": [", x_z_t_k, ", ", y_z_t_k, "]")
+                # print("\tobs dist: ", closest_obstacle_dist)
+                # print("\tprob: ", prob, "\n")
+            p.w = q
 
 
 
@@ -436,14 +437,14 @@ class ParticleFilter:
         delta_yaw = curr_yaw - old_yaw
 
         for p in self.particle_cloud:
-            p.position.x += delta_x
-            p.position.y += delta_y
+            p.pose.position.x += delta_x
+            p.pose.position.y += delta_y
 
             q = quaternion_from_euler(0.0, 0.0, delta_yaw) # ask
-            p.orientation.x += q[0]
-            p.orientation.y += q[1]
-            p.orientation.z += q[2]
-            p.orientation.w += q[3]
+            p.pose.orientation.x += q[0]
+            p.pose.orientation.y += q[1]
+            p.pose.orientation.z += q[2]
+            p.pose.orientation.w += q[3]
 
 
 
