@@ -99,7 +99,7 @@ class ParticleFilter:
 
 
         # the number of particles used in the particle filter
-        self.num_particles = 30
+        self.num_particles = 5000
 
         # initialize the particle cloud array
         self.particle_cloud = []
@@ -318,11 +318,11 @@ class ParticleFilter:
 
                 self.update_particle_weights_with_measurement_model(data)
 
-                #self.normalize_particles()
+                self.normalize_particles()
 
-                #self.resample_particles()
+                self.resample_particles()
 
-                #self.update_estimated_robot_pose()
+                self.update_estimated_robot_pose()
 
                 self.publish_particle_cloud()
                 self.publish_estimated_robot_pose()
@@ -401,10 +401,25 @@ class ParticleFilter:
                 x_z_t_k = p.pose.position.x + z_t_k * math.cos(theta + (cd * math.pi / 180.0))
                 y_z_t_k = p.pose.position.y + z_t_k * math.sin(theta + (cd * math.pi / 180.0))
 
+                # if x_z_t_k > 10:
+                #     x_z_t_k = 10
+                #
+                # if x_z_t_k < -10:
+                #     x_z_t_k = -10
+                #
+                # if y_z_t_k > 10:
+                #     y_z_t_k = 10
+                #
+                # if y_z_t_k < -10:
+                #     y_z_t_k = -10
+
+
                 # find the distance to the closest obstacle
                 closest_obstacle_dist = self.likelihood_field.get_closest_obstacle_distance(x_z_t_k, y_z_t_k)
                 if(closest_obstacle_dist != closest_obstacle_dist):
                     closest_obstacle_dist = 10
+                    print(x_z_t_k)
+                    print(y_z_t_k)
                 # compute the probability based on a zero-centered gaussian with sd = 0.1
                 prob = compute_prob_zero_centered_gaussian(closest_obstacle_dist, 0.1)
 
@@ -440,7 +455,7 @@ class ParticleFilter:
         delta_y = curr_y - old_y
 
 
-        delta_move = int(math.sqrt((delta_x * delta_x) + (delta_y * delta_y)))  # total move distance
+        delta_move = math.sqrt((delta_x * delta_x) + (delta_y * delta_y))  # total move distance
         # TODO is this how we handle angles?
         curr_yaw = get_yaw_from_pose(self.odom_pose.pose)
         old_yaw = get_yaw_from_pose(self.odom_pose_last_motion_update.pose)
@@ -456,11 +471,11 @@ class ParticleFilter:
             p.pose.position.x += delta_move * math.cos(theta)  #+ noise
             p.pose.position.y += delta_move * math.sin(theta) #+ noise
 
-            q = quaternion_from_euler(0.0, 0.0, delta_yaw) # ask
-            p.pose.orientation.x += q[0]
-            p.pose.orientation.y += q[1]
-            p.pose.orientation.z += q[2]
-            p.pose.orientation.w += q[3]
+            q = quaternion_from_euler(0.0, 0.0, theta) # ask
+            p.pose.orientation.x = q[0]
+            p.pose.orientation.y = q[1]
+            p.pose.orientation.z = q[2]
+            p.pose.orientation.w = q[3]
 
 
 
