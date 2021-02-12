@@ -152,16 +152,34 @@ class ParticleFilter:
         # TODO
         print("initialize cloud\n")
         self.particle_cloud = []
-        xrange = (self.map.info.width / 2)
-        yrange = (self.map.info.height / 2)
+        #print(self.map.data)
+        #print(len(self.map.data))
+
+        xrange = self.map.info.width
+        yrange = self.map.info.height
+
+        #xrange = (self.map.info.width / 2)
+        #yrange = (self.map.info.height / 2)
+
         random.seed()
-        self.map.info.origin.position.x
+
+        mapspace = []
+
+        for c in range(len(self.map.data)):
+            if self.map.data[c] == 0:
+                mapspace.append(c)
+
+
+
         for i in range(self.num_particles):
             p = Pose()
             # Position
-            p.position = Point()
-            p.position.x = random.randint(-xrange, xrange)
-            p.position.y = random.randint(-yrange, yrange)
+
+            randompose =  random.choice(mapspace);
+
+            p.position.x = ((randompose % xrange - xrange/2 + self.map.info.origin.position.x) * self.map.info.resolution) #random.randint(-xrange, xrange)
+            p.position.y = ((randompose / yrange - yrange/2 + self.map.info.origin.position.y) * self.map.info.resolution)  #random.randint(-yrange, yrange)
+
             p.position.z = 0
             # Orientation / Angle
             p.orientation = Quaternion()
