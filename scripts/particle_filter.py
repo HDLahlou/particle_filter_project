@@ -217,6 +217,7 @@ class ParticleFilter:
         for p in self.particle_cloud: # add up all weights
             total += p.w
 
+        total += 0.0000000001
         for p in self.particle_cloud: # divide each weight by the total
             p.w = p.w / total
 
@@ -253,7 +254,6 @@ class ParticleFilter:
 
         weightlist = []
         for p in self.particle_cloud:
-            # print(p.w)
             weightlist.append(p.w)
         print(self.num_particles)
         # print(weightlist)
@@ -376,7 +376,8 @@ class ParticleFilter:
             return
 
         cardinal_directions_idxs = [0, 90, 180, 270]
-
+        # print("MAP")
+        # print((self.map.info.origin.position.x)/self.map.info.resolution)
         for p in self.particle_cloud:
             q = 1
             for cd in cardinal_directions_idxs:
@@ -417,17 +418,14 @@ class ParticleFilter:
                 # find the distance to the closest obstacle
                 closest_obstacle_dist = self.likelihood_field.get_closest_obstacle_distance(x_z_t_k, y_z_t_k)
                 if(closest_obstacle_dist != closest_obstacle_dist):
-                    closest_obstacle_dist = 10
-                    print(x_z_t_k)
-                    print(y_z_t_k)
+                    q = 0
+                    continue
                 # compute the probability based on a zero-centered gaussian with sd = 0.1
                 prob = compute_prob_zero_centered_gaussian(closest_obstacle_dist, 0.1)
 
                 # multiply all sensor readings together
                 q = q * prob
-                    # print(q)
-                    # print(prob)
-                    # print(temp)
+
 
                 # print everything out so we can see what we get and debug
                 # print(p)
