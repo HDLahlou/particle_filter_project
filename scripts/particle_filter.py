@@ -53,7 +53,9 @@ def draw_random_sample(choices, probabilities, n):
     values = np.array(range(len(choices)))
     probs = np.array(probabilities)
     bins = np.add.accumulate(probs)
-    inds = values[np.digitize(random_sample(n), bins)]
+    val = np.digitize(random_sample(n), bins)
+    print(val)
+    inds = values[val]
     samples = []
     for i in inds:
         samples.append(deepcopy(choices[int(i)]))
@@ -251,8 +253,10 @@ class ParticleFilter:
 
         weightlist = []
         for p in self.particle_cloud:
+            # print(p.w)
             weightlist.append(p.w)
         print(self.num_particles)
+        # print(weightlist)
         self.particle_cloud = draw_random_sample(self.particle_cloud, weightlist, self.num_particles)
 
     def robot_scan_received(self, data):
@@ -399,12 +403,16 @@ class ParticleFilter:
 
                 # find the distance to the closest obstacle
                 closest_obstacle_dist = self.likelihood_field.get_closest_obstacle_distance(x_z_t_k, y_z_t_k)
-
+                if(closest_obstacle_dist != closest_obstacle_dist):
+                    closest_obstacle_dist = 10
                 # compute the probability based on a zero-centered gaussian with sd = 0.1
                 prob = compute_prob_zero_centered_gaussian(closest_obstacle_dist, 0.1)
 
                 # multiply all sensor readings together
                 q = q * prob
+                    # print(q)
+                    # print(prob)
+                    # print(temp)
 
                 # print everything out so we can see what we get and debug
                 # print(p)
@@ -435,17 +443,18 @@ class ParticleFilter:
         curr_yaw = get_yaw_from_pose(self.odom_pose.pose)
         old_yaw = get_yaw_from_pose(self.odom_pose_last_motion_update.pose)
         delta_yaw = curr_yaw - old_yaw
-
+        print(delta_x)
+        print(delta_y)
         for p in self.particle_cloud:
-            p.pose.position.x += delta_x
-            p.pose.position.y += delta_y
+            noise = random.random()
+            p.pose.position.x += delta_x + noise
+            p.pose.position.y += delta_y + noise
 
             q = quaternion_from_euler(0.0, 0.0, delta_yaw) # ask
             p.pose.orientation.x += q[0]
             p.pose.orientation.y += q[1]
             p.pose.orientation.z += q[2]
             p.pose.orientation.w += q[3]
-
 
 
 
