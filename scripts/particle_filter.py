@@ -99,7 +99,7 @@ class ParticleFilter:
 
 
         # the number of particles used in the particle filter
-        self.num_particles = 5000
+        self.num_particles = 10000
 
         # initialize the particle cloud array
         self.particle_cloud = []
@@ -375,7 +375,9 @@ class ParticleFilter:
         if not(self.initialized):
             return
 
+        # cardinal_directions_idxs = [0, 45, 90, 135, 180, 225, 270, 315]
         cardinal_directions_idxs = [0, 90, 180, 270]
+
         # print("MAP")
         # print((self.map.info.origin.position.x)/self.map.info.resolution)
         for p in self.particle_cloud:
@@ -464,10 +466,10 @@ class ParticleFilter:
         #print(delta_y)
 
         for p in self.particle_cloud:
-            #noise = random.random()
+            noise = random.random()
             theta = delta_yaw + get_yaw_from_pose(p.pose)
-            p.pose.position.x += delta_move * math.cos(theta)  #+ noise
-            p.pose.position.y += delta_move * math.sin(theta) #+ noise
+            p.pose.position.x += delta_move * math.cos(theta) + noise
+            p.pose.position.y += delta_move * math.sin(theta) + noise
 
             q = quaternion_from_euler(0.0, 0.0, theta) # ask
             p.pose.orientation.x = q[0]
