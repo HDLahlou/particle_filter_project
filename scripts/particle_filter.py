@@ -99,7 +99,7 @@ class ParticleFilter:
 
 
         # the number of particles used in the particle filter
-        self.num_particles = 10000
+        self.num_particles = 30
 
         # initialize the particle cloud array
         self.particle_cloud = []
@@ -318,11 +318,11 @@ class ParticleFilter:
 
                 self.update_particle_weights_with_measurement_model(data)
 
-                self.normalize_particles()
+                #self.normalize_particles()
 
-                self.resample_particles()
+                #self.resample_particles()
 
-                self.update_estimated_robot_pose()
+                #self.update_estimated_robot_pose()
 
                 self.publish_particle_cloud()
                 self.publish_estimated_robot_pose()
@@ -439,16 +439,22 @@ class ParticleFilter:
         old_y = self.odom_pose_last_motion_update.pose.position.y
         delta_y = curr_y - old_y
 
+
+        delta_move = int(math.sqrt((delta_x * delta_x) + (delta_y * delta_y)))  # total move distance
         # TODO is this how we handle angles?
         curr_yaw = get_yaw_from_pose(self.odom_pose.pose)
         old_yaw = get_yaw_from_pose(self.odom_pose_last_motion_update.pose)
+
         delta_yaw = curr_yaw - old_yaw
-        print(delta_x)
-        print(delta_y)
+
+        #print(delta_x)
+        #print(delta_y)
+
         for p in self.particle_cloud:
-            noise = random.random()
-            p.pose.position.x += delta_x + noise
-            p.pose.position.y += delta_y + noise
+            #noise = random.random()
+            theta = delta_yaw + get_yaw_from_pose(p.pose)
+            p.pose.position.x += delta_move * math.cos(theta)  #+ noise
+            p.pose.position.y += delta_move * math.sin(theta) #+ noise
 
             q = quaternion_from_euler(0.0, 0.0, delta_yaw) # ask
             p.pose.orientation.x += q[0]
