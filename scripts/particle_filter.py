@@ -177,8 +177,8 @@ class ParticleFilter:
 
             randompose =  random.choice(mapspace);
 
-            p.position.x = (randompose % xrange - xrange/2) / 20 #random.randint(-xrange, xrange)
-            p.position.y = (randompose / yrange - yrange/2) / 20 #random.randint(-yrange, yrange)
+            p.position.x = ((randompose % xrange - xrange/2 + self.map.info.origin.position.x) * self.map.info.resolution) #random.randint(-xrange, xrange)
+            p.position.y = ((randompose / yrange - yrange/2 + self.map.info.origin.position.y) * self.map.info.resolution)  #random.randint(-yrange, yrange)
 
             p.position.z = 0
             # Orientation / Angle
