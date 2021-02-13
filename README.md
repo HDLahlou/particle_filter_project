@@ -114,9 +114,7 @@ If we had more time, we would find a clearer way to address getting nan values. 
 ### Gifs
 RViz: Particles converging on the robot 
 https://drive.google.com/file/d/1nTxVJd42PdpYRsL58dTQeJnZZg8TA1-H/view?usp=sharing
-![picture alt](https://drive.google.com/file/d/1nTxVJd42PdpYRsL58dTQeJnZZg8TA1-H/view?usp=sharing "RVIZ Particles")
 
 Gazebo: navigating out of the room! https://drive.google.com/file/d/1d0BUKg75F8im4g26W9YqTdzj9MbvXl7V/view?usp=sharing
-![picture alt](https://drive.google.com/file/d/1d0BUKg75F8im4g26W9YqTdzj9MbvXl7V/view?usp=sharing "Gazebo Navigation")
 
 *NOTE: We were unsure of how many gifs or images we needed, if more are needed, they can be available upon request*
