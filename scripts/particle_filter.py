@@ -22,6 +22,13 @@ from random import randint, random
 
 import random
 
+def prevent_outside_index(arr, n):
+    for i in range(len(arr)):
+        if arr[i] >= n:
+            arr[i] = n-1
+    return arr
+
+
 # HELPER FUNCTIONS: SOURCED FROM CLASS
 
 def compute_prob_zero_centered_gaussian(dist, sd):
@@ -54,6 +61,7 @@ def draw_random_sample(choices, probabilities, n):
     probs = np.array(probabilities)
     bins = np.add.accumulate(probs)
     val = np.digitize(random_sample(n), bins)
+    val = prevent_outside_index(val, n)
     inds = values[val]
     samples = []
     for i in inds:
@@ -205,16 +213,19 @@ class ParticleFilter:
 
     def normalize_particles(self):
         # make all the particle weights sum to 1.0
-
+        lowerBound = 0.00001
         total  = 0
         for p in self.particle_cloud: # add up all weights
+            if (p.w < lowerBound):
+                p.w = lowerBound
             total += p.w
 
         # Ensures that total is nonzero to avoid DIV_BY_ZERO error
-        total += 0.0000000001
+        total += lowerBound
 
         for p in self.particle_cloud: # divide each weight by the total
             p.w = p.w / total
+
 
     def publish_particle_cloud(self):
 
@@ -436,6 +447,7 @@ class ParticleFilter:
         for p in self.particle_cloud:
             # Randomize number to add noise
             noise = random.random()
+            noise -= 0.5
 
             # Calc current yaw
             theta = delta_yaw + get_yaw_from_pose(p.pose)
