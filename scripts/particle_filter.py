@@ -104,7 +104,6 @@ class ParticleFilter:
         self.map = OccupancyGrid()
         #self.occupancy_field = None
 
-
         # the number of particles used in the particle filter
         self.num_particles = 10000
 
@@ -162,44 +161,78 @@ class ParticleFilter:
 
         # Initialize Data and map constants
         self.particle_cloud = []
-        xrange = self.map.info.width
-        yrange = self.map.info.height
+        xrange = (self.map.info.width - 60) / 13
+        yrange = (self.map.info.height - 60) / 13
 
         random.seed()
 
         mapspace = []
+        
+        for x in range(13):
+            for y in range(13):
+                p = Pose()
+                p.position.x = ((x)*xrange - ((13/2)*xrange) + self.map.info.origin.position.x)*self.map.info.resolution +.5
+                p.position.y = ((y)*yrange - ((13/2)*yrange) + self.map.info.origin.position.y)*self.map.info.resolution + .5
+                p.position.z = 0
+                test = int((((p.position.y-.5)/self.map.info.resolution) - self.map.info.origin.position.y + self.map.info.height/2) * self.map.info.height)
+                print(test)
+                print(p.position.y)
+                print(self.map.data[test])
+                p.orientation = Quaternion()
+                p.orientation.x = 0
+                p.orientation.y = 0
+                p.orientation.z = 0
+                p.orientation.w = 0
 
-        # Loop through map and find acceptable data grids
-        for c in range(len(self.map.data)):
-            if self.map.data[c] == 0:
-                mapspace.append(c)
+                # p.position.x = ((test % self.map.info.width - self.map.info.width/2 + self.map.info.origin.position.x) * self.map.info.resolution) + .5
+                # p.position.y = ((test / self.map.info.height - self.map.info.height/2 + self.map.info.origin.position.y) * self.map.info.resolution) + .5
+
+                new_particle = Particle(p, 1.0)
 
 
-        # Randomize positions and add to cloud
-        for i in range(self.num_particles):
-            p = Pose()
+                # print(p.position.y)
 
-            # Position
-            randompose =  random.choice(mapspace)
+                # new_particle2 = Particle(p, 1.0)
 
-            # Convert map entry into x and y format
-            p.position.x = ((randompose % xrange - xrange/2 + self.map.info.origin.position.x) * self.map.info.resolution)
-            p.position.y = ((randompose / yrange - yrange/2 + self.map.info.origin.position.y) * self.map.info.resolution)
-            p.position.z = 0
+                self.particle_cloud.append(new_particle)
+                # self.particle_cloud.append(new_particle2)
 
-            # Orientation / Angle
-            p.orientation = Quaternion()
-            q = quaternion_from_euler(0.0, 0.0, random.uniform(0, np.pi))
-            p.orientation.x = q[0]
-            p.orientation.y = q[1]
-            p.orientation.z = q[2]
-            p.orientation.w = q[3]
 
-            # initialize the new particle, where all will have the same weight (1.0)
-            new_particle = Particle(p, 1.0)
 
-            # append the particle to the particle cloud
-            self.particle_cloud.append(new_particle)
+
+        # # Loop through map and find acceptable data grids
+        # for c in range(len(self.map.data)):
+        #     if self.map.data[c] == 0:
+        #         mapspace.append(c)
+
+
+        # # Randomize positions and add to cloud
+        # for i in range(len(self.map.data)):
+        #     if (self.map.data[i] == 0 and i%4 == 0):
+        #         p = Pose()
+
+        #         # Convert map entry into x and y format
+        #         p.position.y = -((i % xrange - xrange/2 + self.map.info.origin.position.x) * self.map.info.resolution) - .1
+        #         p.position.x = ((i / yrange - yrange/2 + self.map.info.origin.position.y) * self.map.info.resolution) - .1
+        #         p.position.z = 0
+
+        #         # Orientation / Angle
+        #         p.orientation = Quaternion()
+        #         q = quaternion_from_euler(0.0, 0.0, random.uniform(0, np.pi))
+        #         p.orientation.x = 0
+        #         p.orientation.y = 0
+        #         p.orientation.z = 0
+        #         p.orientation.w = 0
+
+        #         # initialize the new particle, where all will have the same weight (1.0)
+        #         new_particle = Particle(p, 1.0)
+        #         if len(self.particle_cloud) > 0:
+        #             prev_particle = self.particle_cloud[(len(self.particle_cloud) -1)].pose.position
+        #             if(abs(prev_particle.x - p.position.x) > 0):
+        #                 self.particle_cloud.append(new_particle)
+        #         else:
+        #             self.particle_cloud.append(new_particle)
+
 
 
 
